@@ -64,55 +64,61 @@ struct RectangleView: View {
                         }
                 }
             )
-            .overlay {
-                // 在矩形的中间位置显示矩形大小
-                VStack(alignment: .leading) {
-                    Text("W:\(format(value: self.size.width))")
-                    Text("H:\(format(value: self.size.height))")
-                }
-                .padding(5)
-                .font(.caption)
-                .foregroundColor(.white)
-                .background(
-                    Rectangle()
-                        .fill(.black.opacity(0.5))
-                )
-            }
-            .overlay {
-                // 在矩形的左上角显示矩形坐标最小值
-                VStack(alignment: .leading) {
-                    Text("(\(format(value: self.position.minX)), \(format(value: self.position.minY)))")
-                }
-                .padding(5)
-                .font(.caption)
-                .foregroundColor(.white)
-                .background(
-                    Rectangle()
-                        .fill(.black.opacity(0.5))
-                )
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .frame(maxHeight: .infinity, alignment: .top)
-            }
-            .overlay {
-                // 在矩形的右下角显示矩形坐标最大值
-                VStack(alignment: .leading) {
-                    Text("(\(format(value: self.position.maxX)), \(format(value: self.position.maxY)))")
-                }
-                .padding(5)
-                .font(.caption)
-                .foregroundColor(.white)
-                .background(
-                    Rectangle()
-                        .fill(.black.opacity(0.5))
-                )
-                .frame(maxWidth: .infinity, alignment: .trailing)
-                .frame(maxHeight: .infinity, alignment: .bottom)
-            }
+            .overlayText(
+                text: "W:\(format(value: self.size.width))\nH:\(format(value: self.size.height))",
+                alignment: .center)
+            .overlayText(
+                text: "(\(format(value: self.position.minX)), \(format(value: self.position.minY)))",
+                alignment: .topLeading)
+            .overlayText(
+                text: "(\(format(value: self.position.maxX)), \(format(value: self.position.maxY)))",
+                alignment: .bottomTrailing)
     }
     
     // 数字格式化，保留2位小数
     func format(value: Double) -> String {
         return String(format: "%.2f", value)
+    }
+}
+
+extension View {
+    // 标注背景样式
+    func markBackgroundStyle() -> some View {
+        modifier(MarkBackgroundModifier())
+    }
+    
+    // 覆盖文字视图
+    func overlayText(text: String, alignment: Alignment) -> some View {
+        modifier(OverlayTextModifier(text: text, alignment: alignment))
+    }
+}
+
+struct MarkBackgroundModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .padding(5)
+            .font(.caption)
+            .foregroundColor(.white)
+            .background(
+                Rectangle()
+                    .fill(.black.opacity(0.5))
+            )
+    }
+}
+
+struct OverlayTextModifier: ViewModifier {
+    let text: String
+    let alignment: Alignment
+    
+    func body(content: Content) -> some View {
+        content
+            .overlay (
+                VStack(alignment: .leading) {
+                    Text(text)
+                }
+                    .markBackgroundStyle()
+                , alignment: alignment
+            )
     }
 }
 
